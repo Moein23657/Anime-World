@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<!--
+    Custom AnimeWorld demo
+
+    This HTML document stitches together the extracted CSS and
+    JavaScript into a fully functional single‑page application.  It
+    retains the same visual polish and interactivity found in the
+    original template while switching to a modular structure.  Data
+    lives in `data/anime-data.json` and images reside under
+    `images/`, making it straightforward to add or replace content
+    without touching the markup or scripts.
+-->
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="دنیای انیمه - مرجع دانلود انیمه با زیرنویس فارسی، پخش آنلاین و ویژگی‌های پیشرفته">
+    <title>دنیای انیمه – نسخه سفارشی</title>
+    <!-- Preconnect to external resources for performance -->
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com" defer></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest" defer></script>
+    <!-- Site stylesheet -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Skip link for keyboard and screen reader users -->
+    <a href="#main-content" class="skip-link">رفتن به محتوا</a>
+    <!-- Ambient background aurora -->
+    <div id="aurora-background">
+        <div class="aurora-blob aurora-blob-1"></div>
+        <div class="aurora-blob aurora-blob-2"></div>
+    </div>
+    <!-- Header and navigation -->
+    <header class="bg-slate-900/70 backdrop-blur border-b border-slate-700 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+            <div class="flex items-center gap-3">
+                <h1 class="text-2xl md:text-3xl font-extrabold logo-gradient">AnimeWorld</h1>
+            </div>
+            <nav class="hidden md:flex space-x-4 space-x-reverse" id="nav-links" aria-label="منوی ناوبری اصلی">
+                <button onclick="showPage('home')" class="text-gray-200 hover:text-indigo-400 transition-colors">خانه</button>
+                <button onclick="showPage('anime-list')" class="text-gray-200 hover:text-indigo-400 transition-colors">لیست انیمه‌ها</button>
+                <button onclick="showPage('favorites')" class="text-gray-200 hover:text-indigo-400 transition-colors">علاقه‌مندی‌ها</button>
+                <button onclick="showPage('watchlist')" class="text-gray-200 hover:text-indigo-400 transition-colors">لیست تماشا</button>
+                <button onclick="showPage('about')" class="text-gray-200 hover:text-indigo-400 transition-colors">درباره ما</button>
+                <button id="login-nav-btn" onclick="showPage('login')" class="text-gray-200 hover:text-indigo-400 transition-colors">ورود</button>
+                <button onclick="showPage('admin')" class="text-gray-200 hover:text-indigo-400 transition-colors">مدیریت</button>
+            </nav>
+            <div class="flex items-center gap-3">
+                <!-- Search bar -->
+                <div class="relative hidden sm:block">
+                    <input id="search-input" type="text" placeholder="…جستجوی انیمه" class="bg-slate-800 text-gray-200 px-4 py-2 rounded-lg w-64 focus:outline-none" aria-label="جستجوی انیمه">
+                    <i data-lucide="search" class="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400 pointer-events-none"></i>
+                    <!-- Suggestions dropdown: populated dynamically via JS. Hidden by default -->
+                    <ul id="search-suggestions" class="absolute right-0 mt-1 w-64 bg-slate-800 text-gray-200 rounded-lg shadow-lg border border-slate-700 overflow-y-auto max-h-60 hidden z-20"></ul>
+                </div>
+                <!-- Theme toggle -->
+                <button id="theme-toggle" aria-label="تغییر تم" class="p-2 rounded-lg hover:bg-slate-800 transition-colors">
+                    <i data-lucide="moon" class="w-5 h-5 text-gray-200"></i>
+                </button>
+                <!-- Mobile menu toggle -->
+                <button id="mobile-menu-toggle" class="md:hidden p-2 rounded-lg hover:bg-slate-800 transition-colors" aria-label="باز و بسته کردن منو" aria-controls="nav-links-mobile" aria-expanded="false">
+                    <i data-lucide="menu" class="w-5 h-5 text-gray-200"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile navigation list -->
+        <!-- Give the mobile nav a unique ID so it doesn't clash with the desktop navigation. A duplicate `id` can cause unexpected behaviour when toggling the menu from JavaScript. -->
+        <nav id="nav-links-mobile" class="md:hidden hidden border-t border-slate-700 bg-slate-900/80 backdrop-blur p-4 space-y-2" aria-label="منوی ناوبری موبایل">
+            <button onclick="showPage('home')" class="block w-full text-right text-gray-200 hover:text-indigo-400 transition-colors">خانه</button>
+            <button onclick="showPage('anime-list')" class="block w-full text-right text-gray-200 hover:text-indigo-400 transition-colors">لیست انیمه‌ها</button>
+            <button onclick="showPage('favorites')" class="block w-full text-right text-gray-200 hover:text-indigo-400 transition-colors">علاقه‌مندی‌ها</button>
+            <button onclick="showPage('watchlist')" class="block w-full text-right text-gray-200 hover:text-indigo-400 transition-colors">لیست تماشا</button>
+            <button onclick="showPage('about')" class="block w-full text-right text-gray-200 hover:text-indigo-400 transition-colors">درباره ما</button>
+            <button id="login-nav-btn-mobile" onclick="showPage('login')" class="block w-full text-right text-gray-200 hover:text-indigo-400 transition-colors">ورود</button>
+            <button onclick="showPage('admin')" class="block w-full text-right text-gray-200 hover:text-indigo-400 transition-colors">مدیریت</button>
+        </nav>
+    </header>
+    <!-- Main content wrapper -->
+    <main id="main-content" class="pt-4 pb-12 min-h-screen">
+        <!-- Home page -->
+        <section id="home-page" class="page active space-y-16">
+            <!-- Hero slider -->
+            <div class="relative h-[70vh] overflow-hidden">
+                <div id="hero-slider" class="w-full h-full relative"></div>
+                <div id="slider-dots" class="absolute bottom-6 right-6 flex gap-2"></div>
+            </div>
+            <!-- Recent and popular sections -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+                <div class="space-y-8 reveal-on-scroll">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-white">قسمت‌های جدید</h2>
+                        <button onclick="showPage('anime-list')" class="text-indigo-400 hover:text-indigo-300 transition-colors">مشاهده همه</button>
+                    </div>
+                    <div id="recent-episodes" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+                </div>
+                <div class="space-y-8 reveal-on-scroll">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-white">محبوب‌ترین‌های هفته</h2>
+                        <button onclick="showPage('anime-list')" class="text-indigo-400 hover:text-indigo-300 transition-colors">مشاهده همه</button>
+                    </div>
+                    <div id="popular-anime" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+                </div>
+                <!-- Trending section showing most popular titles based on user ratings -->
+                <div class="space-y-8 reveal-on-scroll">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-white">پرطرفدارترین‌ها</h2>
+                        <button onclick="showPage('anime-list')" class="text-indigo-400 hover:text-indigo-300 transition-colors">مشاهده همه</button>
+                    </div>
+                    <div id="trending-anime" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+                </div>
+                <!-- Top rated section showing highest‑scoring titles -->
+                <div class="space-y-8 reveal-on-scroll">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-white">برترین امتیازها</h2>
+                        <button onclick="showPage('anime-list')" class="text-indigo-400 hover:text-indigo-300 transition-colors">مشاهده همه</button>
+                    </div>
+                    <div id="top-rated-anime" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+                </div>
+            </div>
+        </section>
+        <!-- Anime list (catalogue) page -->
+        <section id="anime-list-page" class="page space-y-12">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+                <h2 class="text-2xl font-bold text-white mb-4">لیست انیمه‌ها</h2>
+                <!-- Filter bar -->
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <select id="genre-filter" onchange="filterAnime()" class="bg-slate-800 text-gray-200 border border-slate-700 rounded-lg px-4 py-2 focus:outline-none">
+                        <option value="">همه ژانرها</option>
+                    </select>
+                    <select id="status-filter" onchange="filterAnime()" class="bg-slate-800 text-gray-200 border border-slate-700 rounded-lg px-4 py-2 focus:outline-none">
+                        <option value="">همه وضعیت‌ها</option>
+                        <option value="FINISHED">پایان یافته</option>
+                        <option value="RELEASING">در حال پخش</option>
+                    </select>
+                    <select id="sort-filter" onchange="filterAnime()" class="bg-slate-800 text-gray-200 border border-slate-700 rounded-lg px-4 py-2 focus:outline-none">
+                        <option value="">بدون ترتیب</option>
+                        <option value="score-desc">امتیاز بالا → پایین</option>
+                        <option value="score-asc">امتیاز پایین → بالا</option>
+                        <option value="title-asc">عنوان الفبایی</option>
+                        <option value="year-desc">جدید → قدیمی</option>
+                        <option value="year-asc">قدیمی → جدید</option>
+                    </select>
+                    <!-- Minimum rating filter -->
+                    <input id="rating-min-filter" type="number" min="0" max="100" placeholder="حداقل امتیاز (۰–۱۰۰)" oninput="filterAnime()" class="bg-slate-800 text-gray-200 border border-slate-700 rounded-lg px-4 py-2 focus:outline-none"/>
+                </div>
+                <!-- Genre buttons -->
+                <div id="genre-buttons" class="flex flex-wrap gap-3 my-4"></div>
+                <!-- Anime grid -->
+                <div id="all-anime-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+                <!-- Pagination controls -->
+                <div id="pagination" class="flex justify-center gap-2 mt-6"></div>
+            </div>
+        </section>
+        <!-- Favorites page -->
+        <section id="favorites-page" class="page space-y-12">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+                <h2 class="text-2xl font-bold text-white mb-4">علاقه‌مندی‌ها</h2>
+                <div id="favorites-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+            </div>
+        </section>
+
+        <!-- Watchlist page -->
+        <section id="watchlist-page" class="page space-y-12">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+                <h2 class="text-2xl font-bold text-white mb-4">لیست تماشا</h2>
+                <div id="watchlist-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+                <h2 class="text-2xl font-bold text-white mb-4">آخرین بازدیدها</h2>
+                <div id="recently-watched" class="space-y-4"></div>
+            </div>
+        </section>
+
+        <!-- Login page -->
+        <section id="login-page" class="page space-y-12">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+                <h2 class="text-2xl font-bold text-white mb-4">ورود / حساب کاربری</h2>
+                <div id="login-container"></div>
+            </div>
+        </section>
+
+        <!-- Admin page -->
+        <section id="admin-page" class="page space-y-12">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+                <h2 class="text-2xl font-bold text-white mb-4">مدیریت انیمه‌ها</h2>
+                <form id="add-anime-form" class="space-y-4">
+                    <!-- Hidden field to track if we are editing an existing anime.  When empty the form will submit a new anime. -->
+                    <input type="hidden" id="editing-id" value="">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input id="new-romaji" type="text" placeholder="عنوان رومجی" required class="bg-slate-800 text-gray-200 border border-slate-700 rounded-lg px-4 py-2 focus:outline-none">
+                        <input id="new-native" type="text" placeholder="عنوان فارسی/ژاپنی" class="bg-slate-800 text-gray-200 border border-slate-700 rounded-lg px-4 py-2 focus:outline-none">
+                        <input id="new-cover" type="text" placeholder="مسیر تصویر (images/...)" required class="bg-slate-800 text-gray-200 border border-slate-700 rounded-lg px-4 py-2 focus:outline-none">
+                        <input id="new-episodes" type="number" placeholder="تعداد قسمت‌ها" min="1" class="bg-slate-800 text-gray-200 border border-slate-700 rounded-lg px-4 py-2 focus:outline-none">
+                        <select id="new-status" class="bg-slate-800 text-gray-200 border border-slate-700 rounded-lg px-4 py-2 focus:outline-none">
+                            <option value="RELEASING">در حال پخش</option>
+                            <option value="FINISHED">پایان یافته</option>
+                        </select>
+                        <select id="new-format" class="bg-slate-800 text-gray-200 border border-slate-700 rounded-lg px-4 py-2 focus:outline-none">
+                            <option value="TV">TV</option>
+                            <option value="ONA">ONA</option>
+                            <option value="OVA">OVA</option>
+                            <option value="MOVIE">Movie</option>
+                        </select>
+                        <input id="new-season" type="text" placeholder="فصل (مثلاً Spring)" class="bg-slate-800 text-gray-200 border border-slate-700 rounded-lg px-4 py-2 focus:outline-none">
+                        <input id="new-year" type="number" placeholder="سال (مثلاً 2025)" class="bg-slate-800 text-gray-200 border border-slate-700 rounded-lg px-4 py-2 focus:outline-none">
+                        <input id="new-studios" type="text" placeholder="استودیوها (با کاما جدا کنید)" class="bg-slate-800 text-gray-200 border border-slate-700 rounded-lg px-4 py-2 focus:outline-none">
+                        <input id="new-score" type="number" placeholder="امتیاز (0-100)" min="0" max="100" class="bg-slate-800 text-gray-200 border border-slate-700 rounded-lg px-4 py-2 focus:outline-none">
+                        <input id="new-genres" type="text" placeholder="ژانرها (با کاما جدا کنید)" class="bg-slate-800 text-gray-200 border border-slate-700 rounded-lg px-4 py-2 focus:outline-none">
+                    </div>
+                    <textarea id="new-description" placeholder="خلاصه داستان" rows="4" class="bg-slate-800 text-gray-200 border border-slate-700 rounded-lg px-4 py-2 focus:outline-none w-full"></textarea>
+                    <button type="submit" class="btn-gradient text-white px-6 py-2 rounded-lg font-medium">افزودن انیمه</button>
+                </form>
+                <div id="admin-message" class="text-green-500"></div>
+
+                <!-- Admin dashboard tools: statistics, search and list of existing entries -->
+                <div id="admin-tools" class="space-y-6 mt-8">
+                    <!-- Summary statistics for quick insights into your catalogue -->
+                    <div id="admin-stats" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4"></div>
+                    <!-- Search and filtering bar for the admin list -->
+                    <div class="flex flex-col sm:flex-row gap-4 items-center">
+                        <input id="admin-search" type="text" placeholder="جستجوی عنوان…" class="bg-slate-800 text-gray-200 border border-slate-700 rounded-lg px-4 py-2 focus:outline-none flex-grow">
+                    </div>
+                    <!-- Container for dynamically generated table of anime entries -->
+                    <div id="admin-anime-list" class="overflow-x-auto"></div>
+                </div>
+
+                <!-- Modal for viewing and moderating comments.  Hidden by default; becomes visible when a title is selected. -->
+                <div id="comments-modal" class="fixed inset-0 flex items-center justify-center bg-black/90 p-4 z-50 hidden">
+                    <div class="bg-slate-800 p-4 rounded-lg w-full md:w-2/3 max-h-[80vh] overflow-y-auto">
+                        <h3 id="comments-modal-title" class="text-xl font-bold text-white mb-4"></h3>
+                        <div id="comments-container" class="space-y-4"></div>
+                        <button id="close-comments-modal" class="mt-4 px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white">بستن</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About page -->
+        <section id="about-page" class="page space-y-12">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+                <h2 class="text-2xl font-bold text-white mb-4">درباره ما</h2>
+                <p class="text-gray-300 leading-relaxed">
+                    وب‌سایت <strong>AnimeWorld</strong> به‌منظور فراهم کردن پلتفرمی جامع برای علاقه‌مندان به انیمه‌های ژاپنی و آسیایی طراحی شده است. در اینجا می‌توانید سریال‌ها و فیلم‌های محبوب خود را پیدا کنید، اطلاعات کامل هر عنوان را مطالعه کنید و لیست علاقه‌مندی‌ها و تماشای خود را مدیریت نمایید.
+                </p>
+                <p class="text-gray-300 leading-relaxed">
+                    این پروژه توسط تیمی از توسعه‌دهندگان و دوستداران انیمه ساخته شده و با تلاش فراوان در حال گسترش است. ما به‌صورت مداوم به بهبود تجربهٔ کاربری، افزودن قابلیت‌های جدید و به‌روزرسانی محتوای دیتابیس می‌پردازیم تا شما بتوانید به‌سادگی به دنیای جذاب انیمه دسترسی داشته باشید.
+                </p>
+                <p class="text-gray-300 leading-relaxed">
+                    در صورت داشتن هرگونه پیشنهاد یا انتقاد، خوشحال می‌شویم از طریق بخش نظرات با ما در میان بگذارید. حضور و همراهی شما انگیزهٔ ما برای ارتقای این پلتفرم است.
+                </p>
+            </div>
+        </section>
+        <!-- Details page -->
+        <section id="details-page" class="page space-y-8">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Clear the location hash when returning from the details page to prevent the view from appearing blank if the page is reloaded. We call `showPage('home')` after resetting the hash so that the correct section becomes visible. -->
+                <button onclick="location.hash=''; showPage('home')" class="mb-4 text-indigo-400 hover:text-indigo-300 transition-colors flex items-center">
+                    <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i> بازگشت
+                </button>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="col-span-1">
+                        <img id="details-poster" src="" alt="پوستر انیمه" class="w-full rounded-lg shadow-lg">
+                    </div>
+                    <div class="col-span-2 space-y-4">
+                        <h2 id="details-title" class="text-3xl font-bold text-white"></h2>
+                        <p id="details-synopsis" class="text-gray-300 leading-relaxed"></p>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                            <div>
+                                <span class="text-gray-400">وضعیت:</span>
+                                <span id="details-status" class="text-white"></span>
+                            </div>
+                            <div>
+                                <span class="text-gray-400">نوع:</span>
+                                <span id="details-type" class="text-white"></span>
+                            </div>
+                            <div>
+                                <span class="text-gray-400">فصل:</span>
+                                <span id="details-season" class="text-white"></span>
+                            </div>
+                            <div>
+                                <span class="text-gray-400">استودیو:</span>
+                                <span id="details-studio" class="text-white"></span>
+                            </div>
+                            <div>
+                                <span class="text-gray-400">امتیاز:</span>
+                                <span id="details-score" class="text-white inline-flex items-center"></span>
+                            </div>
+                            <!-- User rating row: allows visitors to rate the anime locally. Stars are rendered via JS -->
+                            <div>
+                                <span class="text-gray-400">امتیاز شما:</span>
+                                <span id="user-rating" class="text-yellow-400 inline-flex items-center"></span>
+                            </div>
+                            <!-- Watch progress row: displays how many episodes the user has viewed. Updated via JS -->
+                            <div>
+                                <span class="text-gray-400">پیشرفت:</span>
+                                <span id="watch-progress" class="text-green-400 inline-flex items-center"></span>
+                            </div>
+                        </div>
+                        <div id="details-genres" class="flex flex-wrap gap-2"></div>
+                        <div class="flex gap-3 flex-wrap">
+                            <button id="favorite-btn" class="favorite-btn p-2 rounded-lg bg-slate-800/70 text-gray-300 hover:text-pink-500 transition-colors flex items-center" aria-label="علاقه‌مندی">
+                                <i data-lucide="heart" class="w-5 h-5"></i>
+                                <span class="ml-2">افزودن به علاقه‌مندی</span>
+                            </button>
+                            <button id="watchlist-btn" class="watchlist-btn p-2 rounded-lg bg-slate-800/70 text-gray-300 hover:text-yellow-400 transition-colors flex items-center" aria-label="لیست تماشا">
+                                <i data-lucide="bookmark" class="w-5 h-5"></i>
+                                <span class="ml-2">لیست تماشا</span>
+                            </button>
+                <!-- Share button: uses the Web Share API or falls back to copying the link -->
+                <button id="share-btn" class="share-btn p-2 rounded-lg bg-slate-800/70 text-gray-300 hover:text-blue-400 transition-colors flex items-center" aria-label="اشتراک‌گذاری">
+                    <i data-lucide="share-2" class="w-5 h-5"></i>
+                    <span class="ml-2">اشتراک‌گذاری</span>
+                </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Trailer -->
+                <div id="details-trailer" class="mt-8"></div>
+                <!-- Episodes list -->
+                <h3 class="text-2xl font-bold text-white mt-8">قسمت‌ها</h3>
+                <div id="details-episodes" class="space-y-4 mt-4"></div>
+                <!-- Recommended anime section -->
+                <h3 class="text-2xl font-bold text-white mt-8">پیشنهادهای مشابه</h3>
+                <div id="recommended-anime" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4"></div>
+                <!-- Comments -->
+                <h3 class="text-2xl font-bold text-white mt-8">نظرات</h3>
+                <div id="comments-section" class="space-y-4 mt-4"></div>
+                <form id="comment-form" class="mt-4 flex flex-col gap-4">
+                    <textarea id="comment-text" class="bg-slate-800 text-gray-200 border border-slate-700 rounded-lg px-4 py-2 focus:outline-none resize-y" rows="3" placeholder="نظر خود را بنویسید…"></textarea>
+                    <button type="submit" class="btn-gradient text-white px-6 py-2 rounded-lg font-medium">ارسال نظر</button>
+                </form>
+            </div>
+        </section>
+    </main>
+    <!-- Footer -->
+    <footer class="bg-slate-900/70 backdrop-blur border-t border-slate-700 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-400 text-sm">
+            © ۲۰۲۵ AnimeWorld. تمامی حقوق محفوظ است. برای افزودن انیمه‌های جدید، عکس‌ها را در پوشه <code>images/</code> و اطلاعات را در <code>data/anime-data.json</code> قرار دهید.
+        </div>
+    </footer>
+    <!-- Video modal -->
+    <div id="video-modal" class="fixed inset-0 flex items-center justify-center bg-black/90 p-4 z-50" onclick="closeModal()">
+        <div class="modal-content relative" onclick="event.stopPropagation()">
+            <span class="close-btn" onclick="closeModal()">×</span>
+            <div class="video-player">
+                <iframe id="video-iframe" src="" frameborder="0" allowfullscreen class="w-full h-full rounded-lg"></iframe>
+            </div>
+        </div>
+    </div>
+    <!-- Scroll to top button -->
+    <button id="scroll-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="fixed bottom-6 right-6 bg-indigo-600 hover:bg-indigo-500 text-white p-3 rounded-full shadow-lg hidden" aria-label="بازگشت به بالا">
+        <i data-lucide="arrow-up" class="w-6 h-6"></i>
+    </button>
+    <!-- Main script -->
+    <script src="js/main.js" defer></script>
+</body>
+</html>
